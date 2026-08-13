@@ -2,7 +2,7 @@ import time
 
 import cv2
 import mediapipe as mp
-
+from feature_extraction import extract_features
 
 BaseOptions = mp.tasks.BaseOptions
 HandLandmarker = mp.tasks.vision.HandLandmarker
@@ -80,7 +80,17 @@ def main():
 
             if result.hand_landmarks:
                 for hand_landmarks in result.hand_landmarks:
-                    draw_hand_landmarks(frame, hand_landmarks)
+                    draw_hand_landmarks(
+                        frame,
+                        hand_landmarks
+                    )
+
+                    features = extract_features(
+                        hand_landmarks
+                    )
+
+                    if features is not None:
+                        print(features.shape)
 
             cv2.imshow(
                 "Hand Landmarker Test",
