@@ -30,6 +30,9 @@ def main():
 
     with HandLandmarker.create_from_options(options) as landmarker:
 
+        start_time = time.perf_counter()
+        last_timestamp_ms = -1
+
         while True:
             ret, frame = cap.read()
 
@@ -47,7 +50,14 @@ def main():
                 data=rgb_frame
             )
 
-            timestamp_ms = int(time.monotonic() * 1000)
+            timestamp_ms = int(
+                (time.perf_counter() - start_time) * 1000
+            )
+
+            if timestamp_ms <= last_timestamp_ms:
+                timestamp_ms = last_timestamp_ms + 1
+
+            last_timestamp_ms = timestamp_ms
 
             result = landmarker.detect_for_video(
                 mp_image,
@@ -65,8 +75,8 @@ def main():
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-    cap.release()
-    cv2.destroyAllWindows()
+        cap.release()
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
