@@ -9,9 +9,20 @@ HandLandmarker = mp.tasks.vision.HandLandmarker
 HandLandmarkerOptions = mp.tasks.vision.HandLandmarkerOptions
 VisionRunningMode = mp.tasks.vision.RunningMode
 
+HAND_CONNECTIONS = [
+    (0, 1), (1, 2), (2, 3), (3, 4),
+    (0, 5), (5, 6), (6, 7), (7, 8),
+    (5, 9), (9, 10), (10, 11), (11, 12),
+    (9, 13), (13, 14), (14, 15), (15, 16),
+    (13, 17), (17, 18), (18, 19), (19, 20),
+    (0, 17)
+]
 
 def main():
     cap = cv2.VideoCapture(0)
+
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
     if not cap.isOpened():
         print("Error: Could not open webcam.")
@@ -32,6 +43,9 @@ def main():
 
         start_time = time.perf_counter()
         last_timestamp_ms = -1
+
+        cv2.namedWindow("Hand Landmarker Test", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("Hand Landmarker Test", 960, 540)
 
         while True:
             ret, frame = cap.read()
@@ -65,7 +79,8 @@ def main():
             )
 
             if result.hand_landmarks:
-                print("Hand detected!")
+                for hand_landmarks in result.hand_landmarks:
+                    draw_hand_landmarks(frame, hand_landmarks)
 
             cv2.imshow(
                 "Hand Landmarker Test",
@@ -77,6 +92,35 @@ def main():
 
         cap.release()
         cv2.destroyAllWindows()
+
+def draw_hand_landmarks(frame, hand_landmarks):
+    height, width, _ = frame.shape
+
+    points = []
+
+    for landmark in hand_landmarks:
+        pixel_x = int(landmark.x * width)
+        pixel_y = int(landmark.y * height)
+
+        points.append((pixel_x, pixel_y))
+
+    for start_idx, end_idx in HAND_CONNECTIONS:
+        cv2.line(
+            frame,
+            points[start_idx],
+            points[end_idx],
+            (255, 255, 255),
+            2
+        )
+
+    for pixel_x, pixel_y in points:
+        cv2.circle(
+            frame,
+            (pixel_x, pixel_y),
+            5,
+            (0, 255, 0),
+            -1
+        )
 
 if __name__ == "__main__":
     main()
