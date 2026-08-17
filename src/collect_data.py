@@ -31,7 +31,8 @@ def choose_gesture():
     print("Choose the gesture you want to collect:")
 
     for number, gesture in enumerate(GESTURES, start=1):
-        print(f"  {number}: {gesture}")
+        sample_count = count_samples(gesture)
+        print(f"  {number}: {gesture:<12} ({sample_count} samples)")
 
     while True:
         choice = input("Gesture number: ").strip()
